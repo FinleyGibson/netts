@@ -28,14 +28,20 @@ class OpenIEClient:
     def __init__(
         self,
         host: str = "http://localhost",
-        port: int = 8099,
+        port: int = 8000,
         openie_dir: Path = Settings().openie_dir,
         quiet: bool = False,
         memory: int = 20,
     ) -> None:
 
-        self.host = host
+
+
         self.port = port
+        while self.check_port() is False:
+            port += 1
+
+
+        self.host = host
         self.openie_dir = openie_dir
 
         # Can't type: https://github.com/python/typeshed/issues/4948
@@ -54,11 +60,9 @@ class OpenIEClient:
         ) as sock:
             try:
                 sock.bind(("localhost", self.port))
+                return True
             except socket.error:
-                raise FailedException(
-                    f"Error: unable to start openIE server on port {self.port}"
-                    "(possibly something is already running there)"
-                )
+                return False 
 
     def connect(self) -> None:
 
